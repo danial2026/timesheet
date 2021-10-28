@@ -1,14 +1,13 @@
 package com.project.timesheet.service.workSpace;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.project.timesheet.dto.*;
 import com.project.timesheet.entity.WorkSpaceEntity;
 import com.project.timesheet.exception.BusinessServiceException;
 import com.project.timesheet.exception.ErrorCode;
 import com.project.timesheet.repository.WorkSpaceRepository;
+import com.project.timesheet.service.sheet.GoogleAuthorizeUtil;
 import com.project.timesheet.service.sheet.SheetsIntegration;
-import com.project.timesheet.service.sheet.SheetsServiceUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,17 +27,28 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
     private SheetsIntegration sheetsIntegration;
 
     @Override
-    public LoginDTO login() throws BusinessServiceException {
-        LoginDTO loginDTO = new LoginDTO();
-
+    public LoginResponseDTO login() throws BusinessServiceException {
         try {
-            Credential credential = SheetsServiceUtil.getCredential();
+            // ask google auth library to generate a url for authenticating the app
+            String url = GoogleAuthorizeUtil.authorize();
 
-            loginDTO.setAccessToken(credential.getAccessToken());
-            loginDTO.setRefreshToken(credential.getRefreshToken());
-            loginDTO.setExpiresInSeconds(String.valueOf(credential.getExpiresInSeconds()));
+            LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
+            loginResponseDTO.setUrl(url);
 
-            return loginDTO;
+            return loginResponseDTO;
+        } catch (Exception e) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+        }
+    }
+
+    @Override
+    public LoginDTO authenticateCode(String code) throws BusinessServiceException {
+        try {
+            // ask google auth library to authenticate Code and generate access and refresh token
+            TokenResponse tokenResponse = GoogleAuthorizeUtil.authenticateCode(code);
+
+            return convertTokenResponseToLoginDTO(tokenResponse);
         } catch (Exception e) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
@@ -150,5 +160,14 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         workSpaceDTO.setWorkSpaceTitle(workSpaceEntity.getWorkSpaceTitle());
 
         return workSpaceDTO;
+    }
+
+    private LoginDTO convertTokenResponseToLoginDTO(TokenResponse tokenResponse) {
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setAccessToken(tokenResponse.getAccessToken());
+        loginDTO.setRefreshToken(tokenResponse.getRefreshToken());
+        loginDTO.setExpiresInSeconds(tokenResponse.getExpiresInSeconds().toString());
+
+        return loginDTO;
     }
 }

@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface WorkSpaceService {
 
-    LoginDTO login() throws BusinessServiceException;
+    LoginResponseDTO login() throws BusinessServiceException;
+
+    LoginDTO authenticateCode(String code) throws BusinessServiceException;
 
     void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 

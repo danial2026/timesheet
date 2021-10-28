@@ -24,9 +24,20 @@ public class RestAPIs {
      * @throws BusinessServiceException
      */
     @GetMapping("/login")
-    public ResponseEntity<LoginDTO> login() throws BusinessServiceException {
+    public ResponseEntity<LoginResponseDTO> login() throws BusinessServiceException {
 
         return ResponseEntity.ok(workSpaceService.login());
+    }
+
+    /**
+     * @param authenticateCodeRequestDTO
+     * @return
+     * @throws BusinessServiceException
+     */
+    @PostMapping("/authenticate-code")
+    public ResponseEntity<LoginDTO> authenticateCode(@RequestBody AuthenticateCodeRequestDTO authenticateCodeRequestDTO) throws BusinessServiceException {
+
+        return ResponseEntity.ok(workSpaceService.authenticateCode(authenticateCodeRequestDTO.getCode()));
     }
 
     /**

@@ -20,15 +20,17 @@ public class SheetsServiceUtil {
 
     public static Sheets getSheetsService() throws Exception {
 
-        Credential credential = GoogleAuthorizeUtil.authorize();
+//        Credential credential = GoogleAuthorizeUtil.authorize();
 
-        return new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(), credential).setApplicationName(APPLICATION_NAME).build();
+//        return new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(), credential).setApplicationName(APPLICATION_NAME).build();
+        return null;
     }
 
     public static Credential getCredential() throws Exception {
 
-        Credential credential = GoogleAuthorizeUtil.authorize();
-
-        return credential;
+//        Credential credential = GoogleAuthorizeUtil.authorize();
+//
+//        return credential;
+        return null;
     }
 }
