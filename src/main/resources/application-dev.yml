@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: timesheet
+  data:
+    mongodb:
+      database: timesheet_database
+      host: localhost
+      port: 27017
+
+server:
+  port: 8082

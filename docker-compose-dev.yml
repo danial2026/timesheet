@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+
+  mongodb-dev:
+    image: 'mongo:latest'
+    container_name: timesheetmongodbdev
+    environment:
+      - MONGO_LOG_DIR=/dev/null
+    ports:
+      - '27017:27017'
+    volumes:
+      - /Users/danial/timesheetMongo:/data/db
+    restart: unless-stopped
