@@ -87,7 +87,6 @@ class RestAPIsTests {
 
 		WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
 		workSpaceEntity.setId("workSpaceId");
-		workSpaceEntity.setSheetId("sheetId");
 		workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
 		workSpaceEntity.setSpreadSheetId("spreadSheetId");
 
@@ -100,7 +99,7 @@ class RestAPIsTests {
 		when(sheetsIntegrationMock.isAuthorized(anyString(), any(), anyString()))
 				.thenReturn(true);
 
-		when(sheetsIntegrationMock.doesSheetExist(workSpaceEntity.getSpreadSheetId(), workSpaceEntity.getSheetId(), tokenResponse, "test"))
+		when(sheetsIntegrationMock.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, "test"))
 				.thenReturn(true);
 
 		when(workSpaceRepositoryMock.findById(workSpaceEntity.getId()))

@@ -2,7 +2,7 @@ package com.project.timesheet.service.workSpace;
 
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.project.timesheet.dto.*;
-import com.project.timesheet.entity.WorkSpaceEntity;
+import com.project.timesheet.entity.*;
 import com.project.timesheet.exception.BusinessServiceException;
 import com.project.timesheet.exception.ErrorCode;
 import com.project.timesheet.repository.WorkSpaceRepository;
@@ -12,6 +12,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormatSymbols;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,8 +58,46 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
     }
 
     @Override
-    public void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public String createDefaultSheet(String workSpaceId, String sheetTitle, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+        Optional<WorkSpaceEntity> optionalWorkSpaceEntity = workSpaceRepository.findById(workSpaceId);
 
+        if (optionalWorkSpaceEntity.isEmpty()) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_FOUND);
+        }
+
+        WorkSpaceEntity workSpaceEntity = optionalWorkSpaceEntity.get();
+
+        // check if token does have acces by getting sheets list or sth
+        if (!sheetsIntegration.isAuthorized(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+        }
+        // check if sheet does exist
+        if (!sheetsIntegration.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+        }
+
+        LocalDateTime dateNow = LocalDateTime.now();
+        int monthNumber = dateNow.getMonthValue() - 1;
+
+        sheetTitle = getMonthFromInt(monthNumber);
+
+        String sheetId = sheetsIntegration.createSheet(workSpaceEntity.getSpreadSheetId(), sheetTitle, tokenResponse, clientId);
+
+        // set weekday name and date for chosen month
+        sheetsIntegration.addMonthDays(workSpaceEntity.getSpreadSheetId(), sheetTitle, monthNumber, tokenResponse, clientId);
+        // set all cell text horizontal alignment as centered
+        sheetsIntegration.centerAllCellTexts(workSpaceEntity.getSpreadSheetId(), sheetId, tokenResponse, clientId);
+        // change header row(first row) text color and background color
+        sheetsIntegration.setHeadersRowColor(workSpaceEntity.getSpreadSheetId(), sheetId, tokenResponse, clientId);
+
+        return sheetId;
+    }
+
+    @Override
+    public void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
         // first check if token does have acces by getting sheets list or sth
         if (!sheetsIntegration.isAuthorized(createWorkSpaceDTO.getSpreadSheetId(), tokenResponse, clientId)) {
 
@@ -67,7 +107,6 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         WorkSpaceEntity newWorkSpaceEntity = new WorkSpaceEntity();
         newWorkSpaceEntity.setWorkSpaceTitle(createWorkSpaceDTO.getWorkSpaceTitle());
         newWorkSpaceEntity.setSpreadSheetId(createWorkSpaceDTO.getSpreadSheetId());
-        newWorkSpaceEntity.setSheetId(createWorkSpaceDTO.getSheetId());
         newWorkSpaceEntity.setEmail(createWorkSpaceDTO.getEmail());
 
         workSpaceRepository.save(newWorkSpaceEntity);
@@ -94,9 +133,6 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         }
         if (!updateWorkSpaceDTO.getSpreadSheetId().isEmpty()) {
             newWorkSpaceEntity.setSpreadSheetId(updateWorkSpaceDTO.getSpreadSheetId());
-        }
-        if (!updateWorkSpaceDTO.getSheetId().isEmpty()) {
-            newWorkSpaceEntity.setSheetId(updateWorkSpaceDTO.getSheetId());
         }
         if (!updateWorkSpaceDTO.getEmail().isEmpty()) {
             newWorkSpaceEntity.setEmail(updateWorkSpaceDTO.getEmail());
@@ -136,20 +172,21 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
         // check if sheet does exist
-        if (!sheetsIntegration.doesSheetExist(workSpaceEntity.getSpreadSheetId(), workSpaceEntity.getSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
+        List<SheetDTO> sheets = sheetsIntegration.getSheets(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId);
 
-        return convertEntityToWorkSpaceDetailDTO(workSpaceEntity);
+        return convertEntityToWorkSpaceDetailDTO(workSpaceEntity, sheets);
     }
 
-    private WorkSpaceDetailDTO convertEntityToWorkSpaceDetailDTO(WorkSpaceEntity workSpaceEntity){
+    private WorkSpaceDetailDTO convertEntityToWorkSpaceDetailDTO(WorkSpaceEntity workSpaceEntity, List<SheetDTO> sheets){
         WorkSpaceDetailDTO workSpaceDetailDTO =  new WorkSpaceDetailDTO();
         workSpaceDetailDTO.setWorkSpaceId(workSpaceEntity.getId());
         workSpaceDetailDTO.setWorkSpaceTitle(workSpaceEntity.getWorkSpaceTitle());
         workSpaceDetailDTO.setSpreadSheetId(workSpaceEntity.getSpreadSheetId());
-        workSpaceDetailDTO.setSheetId(workSpaceEntity.getSheetId());
+        workSpaceDetailDTO.setSheets(sheets);
 
         return workSpaceDetailDTO;
     }
@@ -169,5 +206,15 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         loginDTO.setExpiresInSeconds(tokenResponse.getExpiresInSeconds().toString());
 
         return loginDTO;
+    }
+
+    private String getMonthFromInt(int num) {
+        String month = "wrong";
+        DateFormatSymbols dfs = new DateFormatSymbols();
+        String[] months = dfs.getMonths();
+        if (num >= 0 && num <= 11 ) {
+            month = months[num];
+        }
+        return month;
     }
 }

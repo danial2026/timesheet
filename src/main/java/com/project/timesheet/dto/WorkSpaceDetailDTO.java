@@ -2,6 +2,8 @@ package com.project.timesheet.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class WorkSpaceDetailDTO {
 
@@ -11,5 +13,9 @@ public class WorkSpaceDetailDTO {
 
     private String spreadSheetId;
 
-    private String sheetId;
+    private List<SheetDTO> sheets;
+
+    public void addSheet(SheetDTO sheet){
+        sheets.add(sheet);
+    }
 }

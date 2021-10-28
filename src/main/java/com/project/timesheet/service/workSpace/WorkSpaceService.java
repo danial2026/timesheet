@@ -12,6 +12,8 @@ public interface WorkSpaceService {
 
     LoginDTO authenticateCode(String code) throws BusinessServiceException;
 
+    String createDefaultSheet(String spreadSheetId, String sheetTitle, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+
     void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 
     List<WorkSpaceDTO> getAllWorkSpaces(String email) throws BusinessServiceException;

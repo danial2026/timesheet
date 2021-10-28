@@ -40,6 +40,25 @@ public class RestAPIs {
         return ResponseEntity.ok(workSpaceService.authenticateCode(authenticateCodeRequestDTO.getCode()));
     }
 
+    @PostMapping("/create-sheet")
+    public ResponseEntity<String> createSheet(
+                                                @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                                @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                                @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                                @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                                @RequestBody CreateSheetDTO CreateSheetDTO
+                                            ) throws BusinessServiceException {
+
+        TokenResponse tokenResponse = new TokenResponse();
+
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setTokenType("offline");
+        tokenResponse.setExpiresInSeconds(expiresInSeconds);
+
+        return ResponseEntity.ok(workSpaceService.createDefaultSheet(CreateSheetDTO.getSpreadSheetId(), CreateSheetDTO.getSheetTitle(),tokenResponse, clientId));
+    }
+
     /**
      * @param taskId
      * @return
@@ -73,7 +92,7 @@ public class RestAPIs {
                                                     @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
                                                     @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
                                                     @RequestBody CreateWorkSpaceDTO createWorkSpaceDTO
-                                             ) throws BusinessServiceException {
+                                                ) throws BusinessServiceException {
 
         TokenResponse tokenResponse = new TokenResponse();
 
@@ -93,12 +112,12 @@ public class RestAPIs {
      */
     @PutMapping("/work-space")
     public ResponseEntity<Void> updateWorkSpace(
-            @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
-            @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
-            @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
-            @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
-            @RequestBody UpdateWorkSpaceDTO updateWorkSpaceDTO
-    ) throws BusinessServiceException {
+                                                        @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                                        @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                                        @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                                        @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                                        @RequestBody UpdateWorkSpaceDTO updateWorkSpaceDTO
+                                                    ) throws BusinessServiceException {
 
         TokenResponse tokenResponse = new TokenResponse();
 
@@ -128,12 +147,12 @@ public class RestAPIs {
      */
     @GetMapping("/work-space")
     public ResponseEntity<WorkSpaceDetailDTO> getWorkSpace(
-                                                    @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
-                                                    @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
-                                                    @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
-                                                    @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
-                                                    @RequestParam(name = "workSpaceId") String workSpaceId
-                                                    ) throws BusinessServiceException {
+                                                            @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                                            @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                                            @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                                            @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                                            @RequestParam(name = "workSpaceId") String workSpaceId
+                                                        ) throws BusinessServiceException {
 
         TokenResponse tokenResponse = new TokenResponse();
 

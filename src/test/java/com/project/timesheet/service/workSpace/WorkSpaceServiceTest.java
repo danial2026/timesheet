@@ -55,14 +55,12 @@ class WorkSpaceServiceTest {
 		WorkSpaceDetailDTO workSpaceDetail = new WorkSpaceDetailDTO();
 
 		WorkSpaceDetailDTO expectWorkSpaceDetail = new WorkSpaceDetailDTO();
-		expectWorkSpaceDetail.setSheetId("sheetId");
 		expectWorkSpaceDetail.setWorkSpaceTitle("workSpaceTitle");
 
 		WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
 		workSpaceEntity.setId("workSpaceId");
 		workSpaceEntity.setEmail("email");
 		workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
-		workSpaceEntity.setSheetId("sheetId");
 
 		given(workSpaceRepositoryMock.findById(anyString()))
 				.willReturn(Optional.of(workSpaceEntity));

@@ -3,11 +3,9 @@ package com.project.timesheet.dto;
 import lombok.Data;
 
 @Data
-public class CreateWorkSpaceDTO {
+public class CreateSheetDTO {
 
-    private String workSpaceTitle;
+    private String sheetTitle;
 
     private String spreadSheetId;
-
-    private String email;
 }

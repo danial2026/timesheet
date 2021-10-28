@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Builder
@@ -32,9 +33,6 @@ public class WorkSpaceEntity {
 
     @Field("spreadSheet_id")
     private String spreadSheetId;
-
-    @Field("sheet_id")
-    private String sheetId;
 
     @LastModifiedDate
     @Field("updated_at")

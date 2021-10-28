@@ -11,7 +11,5 @@ public class UpdateWorkSpaceDTO {
 
     private String spreadSheetId;
 
-    private String sheetId;
-
     private String email;
 }

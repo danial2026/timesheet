@@ -9,7 +9,8 @@ public enum ErrorCode {
     USER_IS_NOT_FOUND("2005"),
     VALUE_IS_NULL("2006"),
     NOT_FOUND("2007"),
-    INVALID_VALUE("2008");
+    INVALID_VALUE("2008"),
+    ALREADY_EXIST("2009");
 
     private final String code;
 
