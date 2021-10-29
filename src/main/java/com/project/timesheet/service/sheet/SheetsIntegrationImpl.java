@@ -22,10 +22,13 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     public void updateSheetValue(String spreadSheetId, String sheetId, String valueId, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
         try {
             Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
-
-            ValueRange body = new ValueRange().setValues(Arrays.asList(Arrays.asList(value)));
-
             valueId = "'" + getSheetTitle(spreadSheetId, sheetId, tokenResponse, clientId) + "'!" + valueId;
+
+            ValueRange getResult = sheetsService.spreadsheets().values().get(spreadSheetId, valueId).execute();
+
+            String currentValue = getResult.getValues().get(0).get(0).toString();
+
+            ValueRange body = new ValueRange().setValues(Arrays.asList(Arrays.asList(currentValue + "\n" + value)));
 
             // read this if you need to know what does `USER_ENTERED` or `RAW` means
             // https://stackoverflow.com/questions/37785216/google-sheets-api-v4-and-valueinputoption
@@ -242,6 +245,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             cellFormat.setBackgroundColor(color);
             cellFormat.setTextFormat(textFormat);
             cellFormat.setHorizontalAlignment("CENTER");
+            cellFormat.setVerticalAlignment("CENTER");
 
             CellData cellData = new CellData();
             cellData.setUserEnteredFormat(cellFormat);
@@ -274,6 +278,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
             CellFormat cellFormat = new CellFormat();
             cellFormat.setHorizontalAlignment("CENTER");
+            cellFormat.setVerticalAlignment("CENTER");
 
             CellData cellData = new CellData();
             cellData.setUserEnteredFormat(cellFormat);
