@@ -24,7 +24,11 @@ public interface SheetsIntegration {
 
     void updateSheetValue(String spreadSheetId, String sheetId, String valueId, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 
+    String getSheetTitle(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+
     List<SheetDTO> getSheets(String spreadSheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+
+    void addFinishedTask(String spreadSheetId, String sheetId, int dayOfMonth, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 
     List<String> getSheetTitles(String spreadSheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 }

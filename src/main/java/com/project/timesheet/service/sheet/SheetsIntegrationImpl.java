@@ -25,12 +25,33 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
             ValueRange body = new ValueRange().setValues(Arrays.asList(Arrays.asList(value)));
 
+            valueId = "'" + getSheetTitle(spreadSheetId, sheetId, tokenResponse, clientId) + "'!" + valueId;
+
             // read this if you need to know what does `USER_ENTERED` or `RAW` means
             // https://stackoverflow.com/questions/37785216/google-sheets-api-v4-and-valueinputoption
             UpdateValuesResponse result = sheetsService.spreadsheets().values().update(spreadSheetId, valueId, body).setValueInputOption("RAW").execute();
         } catch (Exception e) {
 
-            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+            throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
+        }
+    }
+
+    @Override
+    public String getSheetTitle(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+        try {
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+
+            Spreadsheet spreadsheetResponse = sheetsService.spreadsheets().get(spreadSheetId).execute();
+
+            for (Sheet sheet: spreadsheetResponse.getSheets()) {
+                if (sheet.getProperties().getSheetId().toString().equals(sheetId)){
+                    return sheet.getProperties().getTitle();
+                }
+            }
+            throw new BusinessServiceException(ErrorCode.NOT_FOUND);
+        } catch (Exception e) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_FOUND);
         }
     }
 
@@ -52,6 +73,18 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
                     });
 
             return sheets;
+        } catch (Exception e) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+        }
+    }
+
+    @Override
+    public void addFinishedTask(String spreadSheetId, String sheetId, int dayOfMonth, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+        try {
+            String valueId = "C" + String.valueOf(dayOfMonth);
+
+            updateSheetValue(spreadSheetId, sheetId, valueId, value, tokenResponse, clientId);
         } catch (Exception e) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);

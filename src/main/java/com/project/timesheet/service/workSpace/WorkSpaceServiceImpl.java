@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -139,6 +140,26 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         }
 
         workSpaceRepository.save(newWorkSpaceEntity);
+    }
+
+    @Override
+    public void finishWorking(FinishWorkingRequestDTO finishWorkingRequestDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+        Optional<WorkSpaceEntity> optionalWorkSpaceEntity = workSpaceRepository.findById(finishWorkingRequestDTO.getWorkSpaceId());
+        if (optionalWorkSpaceEntity.isEmpty()){
+
+            throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
+        }
+        WorkSpaceEntity newWorkSpaceEntity = optionalWorkSpaceEntity.get();
+
+        if (!sheetsIntegration.isAuthorized(newWorkSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+        }
+
+        LocalDateTime dateNow = LocalDateTime.now();
+        int dayOfMonth = dateNow.getDayOfMonth();
+
+        sheetsIntegration.addFinishedTask(newWorkSpaceEntity.getSpreadSheetId(), finishWorkingRequestDTO.getSheetId(), dayOfMonth,finishWorkingRequestDTO.getTaskId(), tokenResponse, clientId);
     }
 
     @Override
