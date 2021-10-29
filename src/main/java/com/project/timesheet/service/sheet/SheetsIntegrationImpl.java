@@ -82,7 +82,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     @Override
     public void addFinishedTask(String spreadSheetId, String sheetId, int dayOfMonth, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
         try {
-            String valueId = "C" + String.valueOf(dayOfMonth);
+            String valueId = "C" + String.valueOf(dayOfMonth + 1);
 
             updateSheetValue(spreadSheetId, sheetId, valueId, value, tokenResponse, clientId);
         } catch (Exception e) {
