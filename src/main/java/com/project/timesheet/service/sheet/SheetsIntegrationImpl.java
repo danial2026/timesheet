@@ -22,15 +22,39 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     public void updateSheetValue(String spreadSheetId, String sheetId, String valueId, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
         try {
             Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            valueId = "'" + getSheetTitle(spreadSheetId, sheetId, tokenResponse, clientId) + "'!" + valueId;
 
-            ValueRange body = new ValueRange().setValues(Arrays.asList(Arrays.asList(value)));
+            ValueRange getResult = sheetsService.spreadsheets().values().get(spreadSheetId, valueId).execute();
+
+            String currentValue = getResult.getValues().get(0).get(0).toString();
+
+            ValueRange body = new ValueRange().setValues(Arrays.asList(Arrays.asList(currentValue + "\n" + value)));
 
             // read this if you need to know what does `USER_ENTERED` or `RAW` means
             // https://stackoverflow.com/questions/37785216/google-sheets-api-v4-and-valueinputoption
             UpdateValuesResponse result = sheetsService.spreadsheets().values().update(spreadSheetId, valueId, body).setValueInputOption("RAW").execute();
         } catch (Exception e) {
 
-            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+            throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
+        }
+    }
+
+    @Override
+    public String getSheetTitle(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+        try {
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+
+            Spreadsheet spreadsheetResponse = sheetsService.spreadsheets().get(spreadSheetId).execute();
+
+            for (Sheet sheet : spreadsheetResponse.getSheets()) {
+                if (sheet.getProperties().getSheetId().toString().equals(sheetId)) {
+                    return sheet.getProperties().getTitle();
+                }
+            }
+            throw new BusinessServiceException(ErrorCode.NOT_FOUND);
+        } catch (Exception e) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_FOUND);
         }
     }
 
@@ -52,6 +76,18 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
                     });
 
             return sheets;
+        } catch (Exception e) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+        }
+    }
+
+    @Override
+    public void addFinishedTask(String spreadSheetId, String sheetId, int dayOfMonth, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+        try {
+            String valueId = "C" + String.valueOf(dayOfMonth + 1);
+
+            updateSheetValue(spreadSheetId, sheetId, valueId, value, tokenResponse, clientId);
         } catch (Exception e) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
@@ -101,7 +137,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             GridRange gridRange = new GridRange();
 
             GetSpreadsheetByDataFilterRequest getSpreadsheetByDataFilterRequest = new GetSpreadsheetByDataFilterRequest();
-            DataFilter dataFilter= new DataFilter();
+            DataFilter dataFilter = new DataFilter();
             dataFilter.setGridRange(gridRange);
 
             List<DataFilter> filters = new ArrayList<>();
@@ -116,6 +152,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             return false;
         }
     }
+
     @Override
     public boolean doesSheetExist(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
         try {
@@ -125,7 +162,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             gridRange.setSheetId(Integer.parseInt(sheetId));
 
             GetSpreadsheetByDataFilterRequest getSpreadsheetByDataFilterRequest = new GetSpreadsheetByDataFilterRequest();
-            DataFilter dataFilter= new DataFilter();
+            DataFilter dataFilter = new DataFilter();
             dataFilter.setGridRange(gridRange);
 
             List<DataFilter> filters = new ArrayList<>();
@@ -158,7 +195,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
             return response.getReplies().get(0).getAddSheet().getProperties().getSheetId().toString();
         } catch (Exception e) {
-            if (e.getMessage().contains("already exists")){
+            if (e.getMessage().contains("already exists")) {
 
                 throw new BusinessServiceException(ErrorCode.ALREADY_EXIST);
             }
@@ -262,7 +299,59 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
         }
     }
 
-    private List<List<Object>> getMonthDays(int month){
+
+    private List<List<Object>> getMonthDays(int startMonth, int startDay, int endMonth, int endDay) throws BusinessServiceException {
+        if (startMonth > endMonth) {
+
+            throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
+        } else if (startMonth == endMonth) {
+            if (startDay >= endDay) {
+
+                throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
+            }
+        }
+        List<List<Object>> dataColumn = new ArrayList<>();
+
+        for (int monthNumber = 0; monthNumber < endMonth - startMonth; monthNumber++) {
+
+
+            Calendar cal = Calendar.getInstance();
+            if (monthNumber == 0) {
+                cal.set(Calendar.DAY_OF_MONTH, startMonth);
+            } else if (monthNumber == endMonth - startMonth - 1) {
+                cal.set(Calendar.DAY_OF_MONTH, startMonth);
+            }
+            cal.set(Calendar.MONTH, startDay);
+            int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+            List<Object> headersRow = new ArrayList<>();
+            headersRow.add("Day");
+            headersRow.add("Date");
+            headersRow.add("Task");
+            headersRow.add("Actual");
+            headersRow.add("Goal");
+            headersRow.add("Personal Hours");
+            headersRow.add("Start working");
+            headersRow.add("Finish working");
+            dataColumn.add(headersRow);
+            for (int i = 1; i <= maxDay; i++) {
+                cal.set(Calendar.DAY_OF_MONTH, i);
+                List<Object> dataRow = new ArrayList<>();
+
+                dataRow.add(weekDayInDanish(cal.get(Calendar.DAY_OF_WEEK)));
+                dataRow.add(getMonthFromInt(monthNumber) + " " + i);
+
+                dataColumn.add(dataRow);
+            }
+        }
+        return dataColumn;
+
+    }
+
+    private List<List<Object>> getMonthDays(int month) {
         List<List<Object>> dataColumn = new ArrayList<>();
 
         Calendar cal = Calendar.getInstance();
@@ -297,7 +386,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
         String month = "wrong";
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getMonths();
-        if (num >= 0 && num <= 11 ) {
+        if (num >= 0 && num <= 11) {
             month = months[num];
         }
         return month;
@@ -305,14 +394,22 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
     private String weekDayInDanish(int dow) {
         switch (dow) {
-            case Calendar.SUNDAY: return "Sunday";
-            case Calendar.MONDAY: return "Monday";
-            case Calendar.TUESDAY: return "Tuesday";
-            case Calendar.WEDNESDAY: return "Wednesday";
-            case Calendar.THURSDAY: return "Thursday";
-            case Calendar.FRIDAY: return "Friday";
-            case Calendar.SATURDAY: return "Saturday";
-            default: throw new IllegalArgumentException("Unexpected day: " + dow);
+            case Calendar.SUNDAY:
+                return "Sunday";
+            case Calendar.MONDAY:
+                return "Monday";
+            case Calendar.TUESDAY:
+                return "Tuesday";
+            case Calendar.WEDNESDAY:
+                return "Wednesday";
+            case Calendar.THURSDAY:
+                return "Thursday";
+            case Calendar.FRIDAY:
+                return "Friday";
+            case Calendar.SATURDAY:
+                return "Saturday";
+            default:
+                throw new IllegalArgumentException("Unexpected day: " + dow);
         }
     }
 }

@@ -40,14 +40,22 @@ public class RestAPIs {
         return ResponseEntity.ok(workSpaceService.authenticateCode(authenticateCodeRequestDTO.getCode()));
     }
 
+    /**
+     * @param accessToken
+     * @param refreshToken
+     * @param expiresInSeconds
+     * @param clientId
+     * @param CreateSheetDTO
+     * @return
+     * @throws BusinessServiceException
+     */
     @PostMapping("/create-sheet")
-    public ResponseEntity<String> createSheet(
-                                                @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
-                                                @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
-                                                @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
-                                                @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
-                                                @RequestBody CreateSheetDTO CreateSheetDTO
-                                            ) throws BusinessServiceException {
+    public ResponseEntity<String> createSheet(@RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                              @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                              @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                              @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                              @RequestBody CreateSheetDTO CreateSheetDTO
+    ) throws BusinessServiceException {
 
         TokenResponse tokenResponse = new TokenResponse();
 
@@ -56,43 +64,81 @@ public class RestAPIs {
         tokenResponse.setTokenType("offline");
         tokenResponse.setExpiresInSeconds(expiresInSeconds);
 
-        return ResponseEntity.ok(workSpaceService.createDefaultSheet(CreateSheetDTO.getSpreadSheetId(), CreateSheetDTO.getSheetTitle(),tokenResponse, clientId));
+        return ResponseEntity.ok(workSpaceService.createDefaultSheet(CreateSheetDTO.getSpreadSheetId(), CreateSheetDTO.getSheetTitle(), tokenResponse, clientId));
     }
 
     /**
-     * @param taskId
+     * @param accessToken
+     * @param refreshToken
+     * @param expiresInSeconds
+     * @param clientId
+     * @param finishWorkingRequestDTO
      * @return
      * @throws BusinessServiceException
      */
-    @PutMapping("/start-working")
-    public ResponseEntity<Void> startWorking(@RequestParam(name = "taskId") String taskId) throws BusinessServiceException {
+    @PutMapping("/finish-working")
+    public ResponseEntity<Void> finishWorking(@RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                              @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                              @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                              @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                              @RequestBody FinishWorkingRequestDTO finishWorkingRequestDTO
+    ) throws BusinessServiceException {
+
+        TokenResponse tokenResponse = new TokenResponse();
+
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setTokenType("offline");
+        tokenResponse.setExpiresInSeconds(expiresInSeconds);
+
+        workSpaceService.finishWorking(finishWorkingRequestDTO, tokenResponse, clientId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
+     * @param accessToken
+     * @param refreshToken
+     * @param expiresInSeconds
+     * @param clientId
      * @param taskId
      * @return
      * @throws BusinessServiceException
      */
     @PutMapping("/stop-working")
-    public ResponseEntity<Void> stopWorking(@RequestParam(name = "taskId") String taskId) throws BusinessServiceException {
+    public ResponseEntity<Void> stopWorking(@RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                            @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                            @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                            @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                            @RequestParam(name = "taskId") String taskId
+    ) throws BusinessServiceException {
+
+        TokenResponse tokenResponse = new TokenResponse();
+
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setTokenType("offline");
+        tokenResponse.setExpiresInSeconds(expiresInSeconds);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
+     * @param accessToken
+     * @param refreshToken
+     * @param expiresInSeconds
+     * @param clientId
+     * @param createWorkSpaceDTO
      * @return
      * @throws BusinessServiceException
      */
     @PostMapping("/work-space")
-    public ResponseEntity<Void> addWorkSpace(
-                                                    @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
-                                                    @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
-                                                    @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
-                                                    @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
-                                                    @RequestBody CreateWorkSpaceDTO createWorkSpaceDTO
-                                                ) throws BusinessServiceException {
+    public ResponseEntity<Void> addWorkSpace(@RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                             @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                             @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                             @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                             @RequestBody CreateWorkSpaceDTO createWorkSpaceDTO
+    ) throws BusinessServiceException {
 
         TokenResponse tokenResponse = new TokenResponse();
 
@@ -107,17 +153,21 @@ public class RestAPIs {
     }
 
     /**
+     * @param accessToken
+     * @param refreshToken
+     * @param expiresInSeconds
+     * @param clientId
+     * @param updateWorkSpaceDTO
      * @return
      * @throws BusinessServiceException
      */
     @PutMapping("/work-space")
-    public ResponseEntity<Void> updateWorkSpace(
-                                                        @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
-                                                        @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
-                                                        @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
-                                                        @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
-                                                        @RequestBody UpdateWorkSpaceDTO updateWorkSpaceDTO
-                                                    ) throws BusinessServiceException {
+    public ResponseEntity<Void> updateWorkSpace(@RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                                @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                                @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                                @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                                @RequestBody UpdateWorkSpaceDTO updateWorkSpaceDTO
+    ) throws BusinessServiceException {
 
         TokenResponse tokenResponse = new TokenResponse();
 
@@ -132,6 +182,7 @@ public class RestAPIs {
     }
 
     /**
+     * @param email
      * @return
      * @throws BusinessServiceException
      */
@@ -142,17 +193,21 @@ public class RestAPIs {
     }
 
     /**
+     * @param accessToken
+     * @param refreshToken
+     * @param expiresInSeconds
+     * @param clientId
+     * @param workSpaceId
      * @return
      * @throws BusinessServiceException
      */
     @GetMapping("/work-space")
-    public ResponseEntity<WorkSpaceDetailDTO> getWorkSpace(
-                                                            @RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
-                                                            @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
-                                                            @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
-                                                            @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
-                                                            @RequestParam(name = "workSpaceId") String workSpaceId
-                                                        ) throws BusinessServiceException {
+    public ResponseEntity<WorkSpaceDetailDTO> getWorkSpace(@RequestHeader(name = "Google-Sheet-Access-Token") String accessToken,
+                                                           @RequestHeader(name = "Google-Sheet-Refresh-Token") String refreshToken,
+                                                           @RequestHeader(name = "Google-Sheet-Expires-In-Seconds") Long expiresInSeconds,
+                                                           @RequestHeader(name = "Google-Sheet-ClientId") String clientId,
+                                                           @RequestParam(name = "workSpaceId") String workSpaceId
+    ) throws BusinessServiceException {
 
         TokenResponse tokenResponse = new TokenResponse();
 

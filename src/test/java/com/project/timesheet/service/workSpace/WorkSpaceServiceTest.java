@@ -15,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -24,55 +23,55 @@ import static org.mockito.BDDMockito.given;
 @SpringBootTest
 class WorkSpaceServiceTest {
 
-	@MockBean
-	private WorkSpaceService workSpaceServiceMock;
+    @MockBean
+    private WorkSpaceService workSpaceServiceMock;
 
-	@MockBean
-	private SheetsIntegration sheetsIntegrationMock;
+    @MockBean
+    private SheetsIntegration sheetsIntegrationMock;
 
-	@MockBean
-	private WorkSpaceRepository workSpaceRepositoryMock;
+    @MockBean
+    private WorkSpaceRepository workSpaceRepositoryMock;
 
-	@Before
-	public void setUp() throws Exception {
-		WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
-		workSpaceEntity.setId("workSpaceId");
-		workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
-		workSpaceEntity.setSpreadSheetId("spreadSheetId");
+    @Before
+    public void setUp() throws Exception {
+        WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
+        workSpaceEntity.setId("workSpaceId");
+        workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
+        workSpaceEntity.setSpreadSheetId("spreadSheetId");
 
-		Mockito.when(workSpaceRepositoryMock.findById(workSpaceEntity.getId()))
-				.thenReturn(Optional.of(workSpaceEntity));
+        Mockito.when(workSpaceRepositoryMock.findById(workSpaceEntity.getId()))
+                .thenReturn(Optional.of(workSpaceEntity));
 
-		Mockito.when(sheetsIntegrationMock.isAuthorized(anyString(), new TokenResponse(), anyString()))
-				.thenReturn(true);
-	}
+        Mockito.when(sheetsIntegrationMock.isAuthorized(anyString(), new TokenResponse(), anyString()))
+                .thenReturn(true);
+    }
 
-	@Test
-	public void workSpaceService_whenValidNameAndWorkSpaceId_thenWorkSpaceShouldBeFound() throws BusinessServiceException {
-		String workSpaceId = "workSpaceId";
-		String username = "username";
+    @Test
+    public void workSpaceService_whenValidNameAndWorkSpaceId_thenWorkSpaceShouldBeFound() throws BusinessServiceException {
+        String workSpaceId = "workSpaceId";
+        String username = "username";
 
-		WorkSpaceDetailDTO workSpaceDetail = new WorkSpaceDetailDTO();
+        WorkSpaceDetailDTO workSpaceDetail = new WorkSpaceDetailDTO();
 
-		WorkSpaceDetailDTO expectWorkSpaceDetail = new WorkSpaceDetailDTO();
-		expectWorkSpaceDetail.setWorkSpaceTitle("workSpaceTitle");
+        WorkSpaceDetailDTO expectWorkSpaceDetail = new WorkSpaceDetailDTO();
+        expectWorkSpaceDetail.setWorkSpaceTitle("workSpaceTitle");
 
-		WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
-		workSpaceEntity.setId("workSpaceId");
-		workSpaceEntity.setEmail("email");
-		workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
+        WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
+        workSpaceEntity.setId("workSpaceId");
+        workSpaceEntity.setEmail("email");
+        workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
 
-		given(workSpaceRepositoryMock.findById(anyString()))
-				.willReturn(Optional.of(workSpaceEntity));
+        given(workSpaceRepositoryMock.findById(anyString()))
+                .willReturn(Optional.of(workSpaceEntity));
 
-		given(sheetsIntegrationMock.isAuthorized(workSpaceEntity.getSpreadSheetId(), new TokenResponse(), "clientId"))
-				.willReturn(true);
+        given(sheetsIntegrationMock.isAuthorized(workSpaceEntity.getSpreadSheetId(), new TokenResponse(), "clientId"))
+                .willReturn(true);
 
-		try {
-			workSpaceDetail = workSpaceServiceMock.getWorkSpaceDetail(workSpaceId, new TokenResponse(), "clientId");
-		} catch (BusinessServiceException e) {
-			fail(e.getMessage());
-		}
+        try {
+            workSpaceDetail = workSpaceServiceMock.getWorkSpaceDetail(workSpaceId, new TokenResponse(), "clientId");
+        } catch (BusinessServiceException e) {
+            fail(e.getMessage());
+        }
 
 		/*
 		assertThat(workSpaceDetail.getWorkSpaceTitle())
@@ -81,9 +80,9 @@ class WorkSpaceServiceTest {
 		assertThat(workSpaceDetail.getWorkSpaceId())
 				.isEqualTo(workSpaceEntity.getId());
 		 */
-	}
+    }
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 }
