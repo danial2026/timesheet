@@ -46,8 +46,8 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
             Spreadsheet spreadsheetResponse = sheetsService.spreadsheets().get(spreadSheetId).execute();
 
-            for (Sheet sheet: spreadsheetResponse.getSheets()) {
-                if (sheet.getProperties().getSheetId().toString().equals(sheetId)){
+            for (Sheet sheet : spreadsheetResponse.getSheets()) {
+                if (sheet.getProperties().getSheetId().toString().equals(sheetId)) {
                     return sheet.getProperties().getTitle();
                 }
             }
@@ -137,7 +137,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             GridRange gridRange = new GridRange();
 
             GetSpreadsheetByDataFilterRequest getSpreadsheetByDataFilterRequest = new GetSpreadsheetByDataFilterRequest();
-            DataFilter dataFilter= new DataFilter();
+            DataFilter dataFilter = new DataFilter();
             dataFilter.setGridRange(gridRange);
 
             List<DataFilter> filters = new ArrayList<>();
@@ -152,6 +152,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             return false;
         }
     }
+
     @Override
     public boolean doesSheetExist(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
         try {
@@ -161,7 +162,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             gridRange.setSheetId(Integer.parseInt(sheetId));
 
             GetSpreadsheetByDataFilterRequest getSpreadsheetByDataFilterRequest = new GetSpreadsheetByDataFilterRequest();
-            DataFilter dataFilter= new DataFilter();
+            DataFilter dataFilter = new DataFilter();
             dataFilter.setGridRange(gridRange);
 
             List<DataFilter> filters = new ArrayList<>();
@@ -194,7 +195,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
             return response.getReplies().get(0).getAddSheet().getProperties().getSheetId().toString();
         } catch (Exception e) {
-            if (e.getMessage().contains("already exists")){
+            if (e.getMessage().contains("already exists")) {
 
                 throw new BusinessServiceException(ErrorCode.ALREADY_EXIST);
             }
@@ -299,25 +300,25 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
 
-    private List<List<Object>> getMonthDays(int startMonth, int startDay, int endMonth, int endDay) throws BusinessServiceException{
-        if (startMonth > endMonth){
+    private List<List<Object>> getMonthDays(int startMonth, int startDay, int endMonth, int endDay) throws BusinessServiceException {
+        if (startMonth > endMonth) {
 
             throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
-        }else if(startMonth == endMonth){
-            if (startDay >= endDay){
+        } else if (startMonth == endMonth) {
+            if (startDay >= endDay) {
 
                 throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
             }
         }
         List<List<Object>> dataColumn = new ArrayList<>();
 
-        for (int monthNumber = 0 ; monthNumber < endMonth-startMonth ; monthNumber++ ){
+        for (int monthNumber = 0; monthNumber < endMonth - startMonth; monthNumber++) {
 
 
             Calendar cal = Calendar.getInstance();
-            if (monthNumber == 0){
+            if (monthNumber == 0) {
                 cal.set(Calendar.DAY_OF_MONTH, startMonth);
-            }else if(monthNumber == endMonth-startMonth -1){
+            } else if (monthNumber == endMonth - startMonth - 1) {
                 cal.set(Calendar.DAY_OF_MONTH, startMonth);
             }
             cal.set(Calendar.MONTH, startDay);
@@ -350,7 +351,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
     }
 
-    private List<List<Object>> getMonthDays(int month){
+    private List<List<Object>> getMonthDays(int month) {
         List<List<Object>> dataColumn = new ArrayList<>();
 
         Calendar cal = Calendar.getInstance();
@@ -385,7 +386,7 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
         String month = "wrong";
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getMonths();
-        if (num >= 0 && num <= 11 ) {
+        if (num >= 0 && num <= 11) {
             month = months[num];
         }
         return month;
@@ -393,14 +394,22 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
     private String weekDayInDanish(int dow) {
         switch (dow) {
-            case Calendar.SUNDAY: return "Sunday";
-            case Calendar.MONDAY: return "Monday";
-            case Calendar.TUESDAY: return "Tuesday";
-            case Calendar.WEDNESDAY: return "Wednesday";
-            case Calendar.THURSDAY: return "Thursday";
-            case Calendar.FRIDAY: return "Friday";
-            case Calendar.SATURDAY: return "Saturday";
-            default: throw new IllegalArgumentException("Unexpected day: " + dow);
+            case Calendar.SUNDAY:
+                return "Sunday";
+            case Calendar.MONDAY:
+                return "Monday";
+            case Calendar.TUESDAY:
+                return "Tuesday";
+            case Calendar.WEDNESDAY:
+                return "Wednesday";
+            case Calendar.THURSDAY:
+                return "Thursday";
+            case Calendar.FRIDAY:
+                return "Friday";
+            case Calendar.SATURDAY:
+                return "Saturday";
+            default:
+                throw new IllegalArgumentException("Unexpected day: " + dow);
         }
     }
 }

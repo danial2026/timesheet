@@ -17,7 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -27,99 +28,99 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 class RestAPIsTests {
 
-	@MockBean
-	private SheetsIntegration sheetsIntegrationMock;
+    @MockBean
+    private SheetsIntegration sheetsIntegrationMock;
 
-	@MockBean
-	private WorkSpaceRepository workSpaceRepositoryMock;
+    @MockBean
+    private WorkSpaceRepository workSpaceRepositoryMock;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@Test
-	public void updateStartWorkingTime_thenStatus200() throws Exception {
+    @Test
+    public void updateStartWorkingTime_thenStatus200() throws Exception {
 
-		this.mvc.perform(put("/api/v1/start-working")
-				.content("taskId=test")
-				.characterEncoding("UTF-8")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
-				.andExpect(status().isOk());
-	}
+        this.mvc.perform(put("/api/v1/start-working")
+                .content("taskId=test")
+                .characterEncoding("UTF-8")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void updateStopWorkingTime_thenStatus200() throws Exception {
+    @Test
+    public void updateStopWorkingTime_thenStatus200() throws Exception {
 
-		this.mvc.perform(put("/api/v1/stop-working")
-				.content("taskId=test")
-				.characterEncoding("UTF-8")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
-				.andExpect(status().isOk());
-	}
+        this.mvc.perform(put("/api/v1/stop-working")
+                .content("taskId=test")
+                .characterEncoding("UTF-8")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void getWorkSpacesList_thenStatus200() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
+    @Test
+    public void getWorkSpacesList_thenStatus200() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
 
-		headers.add("Google-Sheet-Access-Token", "test");
-		headers.add("Google-Sheet-Refresh-Token", "test");
-		headers.add("Google-Sheet-Expires-In-Seconds", "0");
-		headers.add("Google-Sheet-ClientId", "test");
+        headers.add("Google-Sheet-Access-Token", "test");
+        headers.add("Google-Sheet-Refresh-Token", "test");
+        headers.add("Google-Sheet-Expires-In-Seconds", "0");
+        headers.add("Google-Sheet-ClientId", "test");
 
-		when(sheetsIntegrationMock.isAuthorized(anyString(), any(), anyString()))
-				.thenReturn(true);
+        when(sheetsIntegrationMock.isAuthorized(anyString(), any(), anyString()))
+                .thenReturn(true);
 
-		this.mvc.perform(get("/api/v1/work-spaces-list")
-				.headers(headers)
-				.param("email", "email")
-				)
-				.andExpect(status().isOk());
-	}
+        this.mvc.perform(get("/api/v1/work-spaces-list")
+                .headers(headers)
+                .param("email", "email")
+        )
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void getWorkSpace_thenStatus200() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
+    @Test
+    public void getWorkSpace_thenStatus200() throws Exception {
+        HttpHeaders headers = new HttpHeaders();
 
-		headers.add("Google-Sheet-Access-Token", "test");
-		headers.add("Google-Sheet-Refresh-Token", "test");
-		headers.add("Google-Sheet-Expires-In-Seconds", "0");
-		headers.add("Google-Sheet-ClientId", "test");
+        headers.add("Google-Sheet-Access-Token", "test");
+        headers.add("Google-Sheet-Refresh-Token", "test");
+        headers.add("Google-Sheet-Expires-In-Seconds", "0");
+        headers.add("Google-Sheet-ClientId", "test");
 
 
-		WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
-		workSpaceEntity.setId("workSpaceId");
-		workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
-		workSpaceEntity.setSpreadSheetId("spreadSheetId");
+        WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
+        workSpaceEntity.setId("workSpaceId");
+        workSpaceEntity.setWorkSpaceTitle("workSpaceTitle");
+        workSpaceEntity.setSpreadSheetId("spreadSheetId");
 
-		TokenResponse tokenResponse = new TokenResponse();
-		tokenResponse.setAccessToken("test");
-		tokenResponse.setRefreshToken("test");
-		tokenResponse.setTokenType("offline");
-		tokenResponse.setExpiresInSeconds(0L);
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setAccessToken("test");
+        tokenResponse.setRefreshToken("test");
+        tokenResponse.setTokenType("offline");
+        tokenResponse.setExpiresInSeconds(0L);
 
-		when(sheetsIntegrationMock.isAuthorized(anyString(), any(), anyString()))
-				.thenReturn(true);
+        when(sheetsIntegrationMock.isAuthorized(anyString(), any(), anyString()))
+                .thenReturn(true);
 
-		when(sheetsIntegrationMock.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, "test"))
-				.thenReturn(true);
+        when(sheetsIntegrationMock.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, "test"))
+                .thenReturn(true);
 
-		when(workSpaceRepositoryMock.findById(workSpaceEntity.getId()))
-				.thenReturn(Optional.of(workSpaceEntity));
+        when(workSpaceRepositoryMock.findById(workSpaceEntity.getId()))
+                .thenReturn(Optional.of(workSpaceEntity));
 
-		this.mvc.perform(get("/api/v1/work-space")
-				.param("workSpaceId", "workSpaceId")
-				.headers(headers)
-				)
-				.andExpect(status().isOk());
-	}
+        this.mvc.perform(get("/api/v1/work-space")
+                .param("workSpaceId", "workSpaceId")
+                .headers(headers)
+        )
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
-	private String convertObjectToJsonString(Object object) throws JsonProcessingException {
-		//Creating the ObjectMapper object
-		ObjectMapper mapper = new ObjectMapper();
-		//Converting the Object to JSONString
-		return mapper.writeValueAsString(object);
-	}
+    private String convertObjectToJsonString(Object object) throws JsonProcessingException {
+        //Creating the ObjectMapper object
+        ObjectMapper mapper = new ObjectMapper();
+        //Converting the Object to JSONString
+        return mapper.writeValueAsString(object);
+    }
 }

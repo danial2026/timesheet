@@ -80,7 +80,7 @@ public class GoogleAuthorizeUtil {
                         scope,
                         "https://spreadsheets.google.com/feeds",
                         "https://docs.google.com/feeds")
-                )
+        )
                 .setAccessType("offline")
                 .setApprovalPrompt("auto").build();
 

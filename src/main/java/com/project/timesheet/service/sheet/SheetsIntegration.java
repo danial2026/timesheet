@@ -12,7 +12,7 @@ public interface SheetsIntegration {
 
     boolean doesSheetExist(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 
-    void addMonthDays(String spreadSheetId, String sheetTitle,int monthNumber, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+    void addMonthDays(String spreadSheetId, String sheetTitle, int monthNumber, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 
     void setHeadersRowColor(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 

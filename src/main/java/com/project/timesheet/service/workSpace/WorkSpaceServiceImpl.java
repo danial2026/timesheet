@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
-public class  WorkSpaceServiceImpl implements WorkSpaceService{
+public class WorkSpaceServiceImpl implements WorkSpaceService {
 
     @Autowired
     private WorkSpaceRepository workSpaceRepository;
@@ -122,7 +122,7 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
         Optional<WorkSpaceEntity> optionalWorkSpaceEntity = workSpaceRepository.findById(updateWorkSpaceDTO.getWorkSpaceId());
-        if (optionalWorkSpaceEntity.isEmpty()){
+        if (optionalWorkSpaceEntity.isEmpty()) {
 
             throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
         }
@@ -145,7 +145,7 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
     @Override
     public void finishWorking(FinishWorkingRequestDTO finishWorkingRequestDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
         Optional<WorkSpaceEntity> optionalWorkSpaceEntity = workSpaceRepository.findById(finishWorkingRequestDTO.getWorkSpaceId());
-        if (optionalWorkSpaceEntity.isEmpty()){
+        if (optionalWorkSpaceEntity.isEmpty()) {
 
             throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
         }
@@ -159,7 +159,7 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         LocalDateTime dateNow = LocalDateTime.now();
         int dayOfMonth = dateNow.getDayOfMonth();
 
-        sheetsIntegration.addFinishedTask(newWorkSpaceEntity.getSpreadSheetId(), finishWorkingRequestDTO.getSheetId(), dayOfMonth,finishWorkingRequestDTO.getTaskId(), tokenResponse, clientId);
+        sheetsIntegration.addFinishedTask(newWorkSpaceEntity.getSpreadSheetId(), finishWorkingRequestDTO.getSheetId(), dayOfMonth, finishWorkingRequestDTO.getTaskId(), tokenResponse, clientId);
     }
 
     @Override
@@ -169,9 +169,9 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
 
         listWorkSpaceEntity.forEach(
                 item -> {
-                            listWorkSpaceDTOs.add(convertEntityToWorkSpaceDTO(item));
-                        }
-                );
+                    listWorkSpaceDTOs.add(convertEntityToWorkSpaceDTO(item));
+                }
+        );
 
         return listWorkSpaceDTOs;
     }
@@ -202,8 +202,8 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         return convertEntityToWorkSpaceDetailDTO(workSpaceEntity, sheets);
     }
 
-    private WorkSpaceDetailDTO convertEntityToWorkSpaceDetailDTO(WorkSpaceEntity workSpaceEntity, List<SheetDTO> sheets){
-        WorkSpaceDetailDTO workSpaceDetailDTO =  new WorkSpaceDetailDTO();
+    private WorkSpaceDetailDTO convertEntityToWorkSpaceDetailDTO(WorkSpaceEntity workSpaceEntity, List<SheetDTO> sheets) {
+        WorkSpaceDetailDTO workSpaceDetailDTO = new WorkSpaceDetailDTO();
         workSpaceDetailDTO.setWorkSpaceId(workSpaceEntity.getId());
         workSpaceDetailDTO.setWorkSpaceTitle(workSpaceEntity.getWorkSpaceTitle());
         workSpaceDetailDTO.setSpreadSheetId(workSpaceEntity.getSpreadSheetId());
@@ -212,8 +212,8 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         return workSpaceDetailDTO;
     }
 
-    private WorkSpaceDTO convertEntityToWorkSpaceDTO(WorkSpaceEntity workSpaceEntity){
-        WorkSpaceDTO workSpaceDTO =  new WorkSpaceDTO();
+    private WorkSpaceDTO convertEntityToWorkSpaceDTO(WorkSpaceEntity workSpaceEntity) {
+        WorkSpaceDTO workSpaceDTO = new WorkSpaceDTO();
         workSpaceDTO.setWorkSpaceId(workSpaceEntity.getId());
         workSpaceDTO.setWorkSpaceTitle(workSpaceEntity.getWorkSpaceTitle());
 
@@ -233,7 +233,7 @@ public class  WorkSpaceServiceImpl implements WorkSpaceService{
         String month = "wrong";
         DateFormatSymbols dfs = new DateFormatSymbols();
         String[] months = dfs.getMonths();
-        if (num >= 0 && num <= 11 ) {
+        if (num >= 0 && num <= 11) {
             month = months[num];
         }
         return month;
