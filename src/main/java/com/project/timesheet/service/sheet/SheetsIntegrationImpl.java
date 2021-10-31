@@ -245,7 +245,6 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
             cellFormat.setBackgroundColor(color);
             cellFormat.setTextFormat(textFormat);
             cellFormat.setHorizontalAlignment("CENTER");
-            cellFormat.setVerticalAlignment("CENTER");
 
             CellData cellData = new CellData();
             cellData.setUserEnteredFormat(cellFormat);
@@ -278,7 +277,6 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
             CellFormat cellFormat = new CellFormat();
             cellFormat.setHorizontalAlignment("CENTER");
-            cellFormat.setVerticalAlignment("CENTER");
 
             CellData cellData = new CellData();
             cellData.setUserEnteredFormat(cellFormat);
@@ -298,6 +296,58 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
+    }
+
+
+    private List<List<Object>> getMonthDays(int startMonth, int startDay, int endMonth, int endDay) throws BusinessServiceException{
+        if (startMonth > endMonth){
+
+            throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
+        }else if(startMonth == endMonth){
+            if (startDay >= endDay){
+
+                throw new BusinessServiceException(ErrorCode.INVALID_VALUE);
+            }
+        }
+        List<List<Object>> dataColumn = new ArrayList<>();
+
+        for (int monthNumber = 0 ; monthNumber < endMonth-startMonth ; monthNumber++ ){
+
+
+            Calendar cal = Calendar.getInstance();
+            if (monthNumber == 0){
+                cal.set(Calendar.DAY_OF_MONTH, startMonth);
+            }else if(monthNumber == endMonth-startMonth -1){
+                cal.set(Calendar.DAY_OF_MONTH, startMonth);
+            }
+            cal.set(Calendar.MONTH, startDay);
+            int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+            List<Object> headersRow = new ArrayList<>();
+            headersRow.add("Day");
+            headersRow.add("Date");
+            headersRow.add("Task");
+            headersRow.add("Actual");
+            headersRow.add("Goal");
+            headersRow.add("Personal Hours");
+            headersRow.add("Start working");
+            headersRow.add("Finish working");
+            dataColumn.add(headersRow);
+            for (int i = 1; i <= maxDay; i++) {
+                cal.set(Calendar.DAY_OF_MONTH, i);
+                List<Object> dataRow = new ArrayList<>();
+
+                dataRow.add(weekDayInDanish(cal.get(Calendar.DAY_OF_WEEK)));
+                dataRow.add(getMonthFromInt(monthNumber) + " " + i);
+
+                dataColumn.add(dataRow);
+            }
+        }
+        return dataColumn;
+
     }
 
     private List<List<Object>> getMonthDays(int month){
