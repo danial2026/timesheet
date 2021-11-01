@@ -23,4 +23,6 @@ public interface WorkSpaceService {
     void updateWorkSpace(UpdateWorkSpaceDTO updateWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
 
     void finishWorking(FinishWorkingRequestDTO finishWorkingRequestDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+
+    JiraIssue getJiraIssue(String username, String password, String jiraUrl, String issueKey) throws BusinessServiceException;
 }

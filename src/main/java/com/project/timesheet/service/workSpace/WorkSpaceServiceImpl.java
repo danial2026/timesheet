@@ -2,10 +2,11 @@ package com.project.timesheet.service.workSpace;
 
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.project.timesheet.dto.*;
-import com.project.timesheet.entity.*;
+import com.project.timesheet.entity.WorkSpaceEntity;
 import com.project.timesheet.exception.BusinessServiceException;
 import com.project.timesheet.exception.ErrorCode;
 import com.project.timesheet.repository.WorkSpaceRepository;
+import com.project.timesheet.service.jira.JiraClientImpl;
 import com.project.timesheet.service.sheet.GoogleAuthorizeUtil;
 import com.project.timesheet.service.sheet.SheetsIntegration;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -200,6 +200,13 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
         List<SheetDTO> sheets = sheetsIntegration.getSheets(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId);
 
         return convertEntityToWorkSpaceDetailDTO(workSpaceEntity, sheets);
+    }
+
+    @Override
+    public JiraIssue getJiraIssue(String username, String password, String jiraUrl, String issueKey) throws BusinessServiceException {
+        JiraClientImpl client = new JiraClientImpl(username, password, jiraUrl);
+
+        return client.getIssue(issueKey);
     }
 
     private WorkSpaceDetailDTO convertEntityToWorkSpaceDetailDTO(WorkSpaceEntity workSpaceEntity, List<SheetDTO> sheets) {
