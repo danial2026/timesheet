@@ -68,6 +68,24 @@ public class RestAPIs {
     }
 
     /**
+     * @param jiraEmail
+     * @param jiraApiToken
+     * @param jiraUrl
+     * @param issueKey
+     * @return
+     * @throws BusinessServiceException
+     */
+    @GetMapping("/get-jira-issue")
+    public ResponseEntity<JiraIssue> getJiraIssue(@RequestHeader(name = "Jira-Email") String jiraEmail,
+                                                  @RequestHeader(name = "Jira-Api-Token") String jiraApiToken,
+                                                  @RequestHeader(name = "Jira-URL") String jiraUrl,
+                                                  @RequestParam(name = "issueKey") String issueKey
+    ) throws BusinessServiceException {
+
+        return ResponseEntity.ok(workSpaceService.getJiraIssue(jiraEmail, jiraApiToken, jiraUrl, issueKey));
+    }
+
+    /**
      * @param accessToken
      * @param refreshToken
      * @param expiresInSeconds
