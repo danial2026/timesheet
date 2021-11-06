@@ -39,8 +39,9 @@ public class GoogleAuthorizeUtil {
                 httpTransport, jsonFactory, CLIENT_ID, CLIENT_SECRET,
                 Arrays.asList(
                         scope,
-                        "https://spreadsheets.google.com/feeds",
-                        "https://docs.google.com/feeds"))
+                        "https://spreadsheets.google.com/feeds"
+                )
+        )
                 .setAccessType("offline")
                 .setApprovalPrompt("auto").build();
 
@@ -78,8 +79,8 @@ public class GoogleAuthorizeUtil {
                 httpTransport, jsonFactory, CLIENT_ID, CLIENT_SECRET,
                 Arrays.asList(
                         scope,
-                        "https://spreadsheets.google.com/feeds",
-                        "https://docs.google.com/feeds")
+                        "https://spreadsheets.google.com/feeds"
+                )
         )
                 .setAccessType("offline")
                 .setApprovalPrompt("auto").build();

@@ -12,4 +12,12 @@ class JiraClientImplTest {
         JiraClientImpl client = new JiraClientImpl("your-email@gmail.com", "<API-Token>", "https://ibook.atlassian.net");
         client.getIssue("<issue-key>").toString();
     }
+
+    @Test
+    void getIssuesAssignedToMe() throws BusinessServiceException {
+
+        // get api token from https://id.atlassian.com/manage-profile/security/api-tokens
+        JiraClientImpl client = new JiraClientImpl("your-email@gmail.com", "<API-Token>", "https://ibook.atlassian.net");
+        client.getIssuesAssignedToMe("<project-key>").toString();
+    }
 }

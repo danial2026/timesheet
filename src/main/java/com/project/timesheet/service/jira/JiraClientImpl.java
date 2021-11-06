@@ -8,16 +8,17 @@ import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
 import kong.unirest.json.JSONObject;
-import org.springframework.stereotype.Service;
 
-@Service
+import java.util.ArrayList;
+import java.util.List;
+
 public class JiraClientImpl implements JiraClient {
 
-    private String username;
+    private final String username;
 
-    private String password;
+    private final String password;
 
-    private String jiraUrl;
+    private final String jiraUrl;
 
     public JiraClientImpl(String username, String password, String jiraUrl) {
         this.username = username;
@@ -39,7 +40,7 @@ public class JiraClientImpl implements JiraClient {
                 throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
             }
             issueJson = response.getBody().getObject();
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
@@ -61,5 +62,92 @@ public class JiraClientImpl implements JiraClient {
         }
 
         return new JiraIssue(status, issueType, summary, description.toString());
+    }
+
+    @Override
+    public List<JiraIssue> getIssuesAssignedToMe(String projectKey) throws BusinessServiceException {
+        JSONObject issueJson = null;
+        try {
+            HttpResponse<JsonNode> response = Unirest.post(this.jiraUrl + "/rest/api/3/search")
+                    .basicAuth(this.username, this.password)
+                    .header("Accept", "application/json")
+                    .header("Content-Type", "application/json")
+                    .body("{\"jql\": \"project = " + projectKey + " AND status = \\\"TO DO\\\" AND assignee = currentuser()\", " +
+                            "  \"startAt\": 0 , " +
+                            "  \"maxResults\": 25, " +
+                            "  \"fieldsByKeys\": false, " +
+                            "  \"fields\": [ " +
+                            "    \"status\", " +
+                            "    \"assignee\", " +
+                            "    \"summary\", " +
+                            "    \"description\", " +
+                            "    \"sub-tasks\" " +
+                            "  ] " +
+                            "}")
+                    .asJson();
+
+            if (response.getStatus() != 200) {
+
+                throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+            }
+            issueJson = response.getBody().getObject();
+        } catch (Exception ignored) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+        }
+
+        try {
+
+            List<JiraIssue> resultList = new ArrayList<>();
+
+            issueJson.getJSONArray("issues").forEach(
+                    item -> {
+                        JSONObject jo = (JSONObject) item;
+                        JiraIssue issue = new JiraIssue();
+
+                        issue.setIssueKey(jo.getString("key"));
+                        StringBuilder issueDescription = new StringBuilder();
+                        try {
+                            jo.getJSONObject("fields").getJSONObject("description").getJSONArray("content").forEach(
+                                    description -> {
+                                        JSONObject jod = (JSONObject) description;
+                                        if (jod.getString("type").equals("paragraph")) {
+
+                                            jod.getJSONArray("content").forEach(
+                                                    paragraph -> {
+                                                        JSONObject jop = (JSONObject) paragraph;
+                                                        issueDescription.append(jop.getString("text"));
+                                                        issueDescription.append("\n");
+                                                    }
+                                            );
+                                        }
+                                    }
+                            );
+
+                            issue.setDescription(issueDescription.toString());
+
+                        } catch (Exception ignored) {
+                        }
+
+                        try {
+                            issue.setSummary(jo.getJSONObject("fields").getString("summary"));
+                        } catch (Exception ignored) {
+                        }
+                        issue.setStatus(jo.getJSONObject("fields").getJSONObject("status").getString("name"));
+
+                        try {
+                            issue.setAssignee(jo.getJSONObject("fields").getJSONObject("assignee").getString("displayName"));
+                        } catch (Exception ignored) {
+                        }
+
+                        resultList.add(issue);
+                    }
+            );
+
+            return resultList;
+        } catch (Exception ignored) {
+
+            throw new BusinessServiceException(ErrorCode.NOT_FOUND);
+        }
     }
 }
