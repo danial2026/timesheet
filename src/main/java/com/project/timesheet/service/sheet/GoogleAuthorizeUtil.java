@@ -65,6 +65,20 @@ public class GoogleAuthorizeUtil {
         return credential;
     }
 
+    public static Credential authorize(String token) throws Exception {
+        String scope = SheetsScopes.SPREADSHEETS;
+
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setAccessToken(token);
+
+        Credential credential = createCredentialWithAccessTokenOnly(httpTransport, jsonFactory, tokenResponse);
+        return credential;
+    }
+
     public static TokenResponse authenticateCode(String code) throws Exception {
         String scope = SheetsScopes.SPREADSHEETS;
 

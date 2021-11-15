@@ -8,21 +8,19 @@ import java.util.List;
 
 public interface WorkSpaceService {
 
-    LoginResponseDTO login() throws BusinessServiceException;
+    UserDTO getUserInfo(String token) throws BusinessServiceException;
 
-    LoginDTO authenticateCode(String code) throws BusinessServiceException;
+    String createDefaultSheet(String spreadSheetId, String sheetTitle, TokenResponse tokenResponse) throws BusinessServiceException;
 
-    String createDefaultSheet(String spreadSheetId, String sheetTitle, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+    void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse) throws BusinessServiceException;
 
-    void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+    List<WorkSpaceDTO> getAllWorkSpaces(TokenResponse tokenResponse) throws BusinessServiceException;
 
-    List<WorkSpaceDTO> getAllWorkSpaces(String email) throws BusinessServiceException;
+    WorkSpaceDetailDTO getWorkSpaceDetail(String workSpaceId, TokenResponse tokenResponse) throws BusinessServiceException;
 
-    WorkSpaceDetailDTO getWorkSpaceDetail(String workSpaceId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+    void updateWorkSpace(UpdateWorkSpaceDTO updateWorkSpaceDTO, TokenResponse tokenResponse) throws BusinessServiceException;
 
-    void updateWorkSpace(UpdateWorkSpaceDTO updateWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
-
-    void finishWorking(FinishWorkingRequestDTO finishWorkingRequestDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException;
+    void finishWorking(FinishWorkingRequestDTO finishWorkingRequestDTO, TokenResponse tokenResponse) throws BusinessServiceException;
 
     JiraIssue getJiraIssue(String username, String password, String jiraUrl, String issueKey) throws BusinessServiceException;
 }

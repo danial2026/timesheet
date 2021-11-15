@@ -10,10 +10,13 @@ public class SheetsServiceUtil {
 
     private static final String APPLICATION_NAME = "Time Sheets App";
 
-    public static Sheets getSheetsService(TokenResponse tokenResponse, String clientId) throws Exception {
+    public static Sheets getSheetsService(TokenResponse tokenResponse) throws Exception {
         /* set `Scope` and `TokenType` in `GoogleAuthorizeUtil.authorize` function */
 
-        Credential credential = GoogleAuthorizeUtil.authorize(tokenResponse, clientId);
+        // with accessToken, refreshToken and scope
+//        Credential credential = GoogleAuthorizeUtil.authorize(tokenResponse, clientId);
+        // only with barear token
+        Credential credential = GoogleAuthorizeUtil.authorize(tokenResponse.getAccessToken());
 
         return new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(), credential).setApplicationName(APPLICATION_NAME).build();
     }

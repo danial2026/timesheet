@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
@@ -21,7 +20,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -72,7 +70,7 @@ class RestAPIsTests {
         headers.add("Google-Sheet-Expires-In-Seconds", "0");
         headers.add("Google-Sheet-ClientId", "test");
 
-        when(sheetsIntegrationMock.isAuthorized(anyString(), any(), anyString()))
+        when(sheetsIntegrationMock.isAuthorized(anyString(), any()))
                 .thenReturn(true);
 
         this.mvc.perform(get("/api/v1/work-spaces-list")
@@ -103,10 +101,10 @@ class RestAPIsTests {
         tokenResponse.setTokenType("offline");
         tokenResponse.setExpiresInSeconds(0L);
 
-        when(sheetsIntegrationMock.isAuthorized(anyString(), any(), anyString()))
+        when(sheetsIntegrationMock.isAuthorized(anyString(), any()))
                 .thenReturn(true);
 
-        when(sheetsIntegrationMock.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, "test"))
+        when(sheetsIntegrationMock.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse))
                 .thenReturn(true);
 
         when(workSpaceRepositoryMock.findById(workSpaceEntity.getId()))

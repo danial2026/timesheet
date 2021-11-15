@@ -1,6 +1,7 @@
 package com.project.timesheet.service.workSpace;
 
 import com.google.api.client.auth.oauth2.TokenResponse;
+import com.project.timesheet.dto.FinishWorkingRequestDTO;
 import com.project.timesheet.dto.WorkSpaceDetailDTO;
 import com.project.timesheet.entity.WorkSpaceEntity;
 import com.project.timesheet.exception.BusinessServiceException;
@@ -9,6 +10,7 @@ import com.project.timesheet.service.sheet.SheetsIntegration;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,6 +34,9 @@ class WorkSpaceServiceTest {
     @MockBean
     private WorkSpaceRepository workSpaceRepositoryMock;
 
+    @Autowired
+    private WorkSpaceServiceImpl workSpaceService;
+
     @Before
     public void setUp() throws Exception {
         WorkSpaceEntity workSpaceEntity = new WorkSpaceEntity();
@@ -42,7 +47,7 @@ class WorkSpaceServiceTest {
         Mockito.when(workSpaceRepositoryMock.findById(workSpaceEntity.getId()))
                 .thenReturn(Optional.of(workSpaceEntity));
 
-        Mockito.when(sheetsIntegrationMock.isAuthorized(anyString(), new TokenResponse(), anyString()))
+        Mockito.when(sheetsIntegrationMock.isAuthorized(anyString(), new TokenResponse()))
                 .thenReturn(true);
     }
 
@@ -64,11 +69,11 @@ class WorkSpaceServiceTest {
         given(workSpaceRepositoryMock.findById(anyString()))
                 .willReturn(Optional.of(workSpaceEntity));
 
-        given(sheetsIntegrationMock.isAuthorized(workSpaceEntity.getSpreadSheetId(), new TokenResponse(), "clientId"))
+        given(sheetsIntegrationMock.isAuthorized(workSpaceEntity.getSpreadSheetId(), new TokenResponse()))
                 .willReturn(true);
 
         try {
-            workSpaceDetail = workSpaceServiceMock.getWorkSpaceDetail(workSpaceId, new TokenResponse(), "clientId");
+            workSpaceDetail = workSpaceServiceMock.getWorkSpaceDetail(workSpaceId, new TokenResponse());
         } catch (BusinessServiceException e) {
             fail(e.getMessage());
         }
@@ -83,6 +88,20 @@ class WorkSpaceServiceTest {
     }
 
     @Test
-    void contextLoads() {
+    void contextLoads() throws BusinessServiceException {
+        TokenResponse tokenResponse = new TokenResponse();
+        String accessToken = "";
+
+        tokenResponse.setTokenType("Bearer");
+        tokenResponse.setAccessToken(accessToken);
+
+
+        FinishWorkingRequestDTO finishWorkingRequestDTO = new FinishWorkingRequestDTO();
+        finishWorkingRequestDTO.setWorkSpaceId("test");
+        finishWorkingRequestDTO.setSheetId("test");
+        finishWorkingRequestDTO.setTaskId("test");
+        finishWorkingRequestDTO.setTimeInSec(1l);
+
+        workSpaceService.finishWorking(finishWorkingRequestDTO, tokenResponse);
     }
 }
