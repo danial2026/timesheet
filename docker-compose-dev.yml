@@ -1,5 +1,11 @@
 version: '3'
 
+networks:
+  version-dev:
+    driver: bridge
+    ipam:
+      driver: default
+
 services:
 
   mongodb-dev:
@@ -8,7 +14,18 @@ services:
     environment:
       - MONGO_LOG_DIR=/dev/null
     ports:
-      - '27017:27017'
+      - '57017:27017'
     volumes:
-      - /Users/danial/timesheetMongo:/data/db
+      - /home/danial/timesheetMongo:/data/db
     restart: unless-stopped
+    networks:
+      - version-dev
+
+  timesheet-dev:
+    image: d4n14l/timesheet-module:latest
+    container_name: timesheetdev
+    restart: always
+    depends_on:
+      - mongodb-dev
+    networks:
+      - version-dev

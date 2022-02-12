@@ -4,12 +4,12 @@ spring:
   data:
     mongodb:
       database: timesheet_database
-      host: localhost
+      host: timesheetmongodbdev
       port: 27017
 
 server:
   port: 8082
-  url: localhost
+  url: 141.11.246.224
 
 app-config:
   clientId:
