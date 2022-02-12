@@ -25,6 +25,8 @@ services:
     image: d4n14l/timesheet-module:latest
     container_name: timesheetdev
     restart: always
+    ports:
+      - '8082:8082'
     depends_on:
       - mongodb-dev
     networks:

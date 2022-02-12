@@ -1,7 +1,7 @@
 FROM adoptopenjdk/openjdk11:latest
 MAINTAINER danial "sadcat@tutanota.com"
 
-EXPOSE 9000
+EXPOSE 8082
 RUN mkdir /opt/timesheet-module
 WORKDIR ./timesheet-module
 COPY ./target/timesheet-0.0.1-SNAPSHOT.jar /opt/timesheet-module
