@@ -19,10 +19,10 @@ import java.util.*;
 public class SheetsIntegrationImpl implements SheetsIntegration {
 
     @Override
-    public void updateSheetValue(String spreadSheetId, String sheetId, String valueId, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void updateSheetValue(String spreadSheetId, String sheetId, String valueId, String value, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
-            valueId = "'" + getSheetTitle(spreadSheetId, sheetId, tokenResponse, clientId) + "'!" + valueId;
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
+            valueId = "'" + getSheetTitle(spreadSheetId, sheetId, tokenResponse) + "'!" + valueId;
 
             ValueRange getResult = sheetsService.spreadsheets().values().get(spreadSheetId, valueId).execute();
 
@@ -40,9 +40,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public String getSheetTitle(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public String getSheetTitle(String spreadSheetId, String sheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             Spreadsheet spreadsheetResponse = sheetsService.spreadsheets().get(spreadSheetId).execute();
 
@@ -59,11 +59,11 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public List<SheetDTO> getSheets(String spreadSheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public List<SheetDTO> getSheets(String spreadSheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
             List<SheetDTO> sheets = new ArrayList<>();
 
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             Spreadsheet spreadsheetResponse = sheetsService.spreadsheets().get(spreadSheetId).execute();
 
@@ -83,11 +83,11 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public void addFinishedTask(String spreadSheetId, String sheetId, int dayOfMonth, String value, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void addFinishedTask(String spreadSheetId, String sheetId, int dayOfMonth, String value, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
             String valueId = "C" + String.valueOf(dayOfMonth + 1);
 
-            updateSheetValue(spreadSheetId, sheetId, valueId, value, tokenResponse, clientId);
+            updateSheetValue(spreadSheetId, sheetId, valueId, value, tokenResponse);
         } catch (Exception e) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
@@ -95,11 +95,11 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public List<String> getSheetTitles(String spreadSheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public List<String> getSheetTitles(String spreadSheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
             List<String> sheetTitles = new ArrayList<>();
 
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             Spreadsheet spreadsheetResponse = sheetsService.spreadsheets().get(spreadSheetId).execute();
 
@@ -116,9 +116,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public boolean isAuthorized(String spreadSheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public boolean isAuthorized(String spreadSheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             sheetsService.spreadsheets().get(spreadSheetId).execute();
 
@@ -130,9 +130,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public boolean doesSpreedSheetExist(String spreadSheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public boolean doesSpreedSheetExist(String spreadSheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             GridRange gridRange = new GridRange();
 
@@ -154,9 +154,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public boolean doesSheetExist(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public boolean doesSheetExist(String spreadSheetId, String sheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             GridRange gridRange = new GridRange();
             gridRange.setSheetId(Integer.parseInt(sheetId));
@@ -179,9 +179,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public String createSheet(String spreadSheetId, String sheetTitle, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public String createSheet(String spreadSheetId, String sheetTitle, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             // create an empty new sheet
             List<Request> requests = new ArrayList<>();
@@ -205,9 +205,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public void addMonthDays(String spreadSheetId, String sheetTitle, int monthNumber, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void addMonthDays(String spreadSheetId, String sheetTitle, int monthNumber, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             List<List<Object>> writeData = new ArrayList<>();
             writeData.addAll(getMonthDays(monthNumber));
@@ -231,9 +231,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public void setHeadersRowColor(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void setHeadersRowColor(String spreadSheetId, String sheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             TextFormat textFormat = new TextFormat();
             Color testColor = new Color().setRed(1F).setGreen(1F).setBlue(1F);
@@ -272,9 +272,9 @@ public class SheetsIntegrationImpl implements SheetsIntegration {
     }
 
     @Override
-    public void centerAllCellTexts(String spreadSheetId, String sheetId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void centerAllCellTexts(String spreadSheetId, String sheetId, TokenResponse tokenResponse) throws BusinessServiceException {
         try {
-            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse, clientId);
+            Sheets sheetsService = SheetsServiceUtil.getSheetsService(tokenResponse);
 
             CellFormat cellFormat = new CellFormat();
             cellFormat.setHorizontalAlignment("CENTER");

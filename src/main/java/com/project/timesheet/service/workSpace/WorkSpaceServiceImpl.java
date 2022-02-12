@@ -7,8 +7,11 @@ import com.project.timesheet.exception.BusinessServiceException;
 import com.project.timesheet.exception.ErrorCode;
 import com.project.timesheet.repository.WorkSpaceRepository;
 import com.project.timesheet.service.jira.JiraClientImpl;
-import com.project.timesheet.service.sheet.GoogleAuthorizeUtil;
 import com.project.timesheet.service.sheet.SheetsIntegration;
+import kong.unirest.HttpResponse;
+import kong.unirest.JsonNode;
+import kong.unirest.Unirest;
+import kong.unirest.json.JSONObject;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,36 +33,41 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
     private SheetsIntegration sheetsIntegration;
 
     @Override
-    public LoginResponseDTO login() throws BusinessServiceException {
+    public UserDTO getUserInfo(String token) throws BusinessServiceException {
+        JSONObject issueJson = null;
         try {
-            // ask google auth library to generate a url for authenticating the app
-            String url = GoogleAuthorizeUtil.authorize();
+            HttpResponse<JsonNode> response = Unirest.get("https://www.googleapis.com/oauth2/v1/userinfo?alt=json")
+                    .header("Accept", "application/json")
+                    .header("Authorization", "Bearer " + token)
+                    .asJson();
 
-            LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
-            loginResponseDTO.setUrl(url);
+            if (response.getStatus() != 200) {
 
-            return loginResponseDTO;
-        } catch (Exception e) {
+                throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
+            }
+            issueJson = response.getBody().getObject();
+        } catch (Exception ignored) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
+
+        UserDTO userDTO = new UserDTO();
+
+        userDTO.setId(issueJson.getString("id"));
+        userDTO.setEmail(issueJson.getString("email"));
+        userDTO.setVerified_email(issueJson.getString("verified_email"));
+        userDTO.setName(issueJson.getString("name"));
+        userDTO.setGiven_name(issueJson.getString("given_name"));
+        userDTO.setFamily_name(issueJson.getString("family_name"));
+        userDTO.setPicture(issueJson.getString("picture"));
+        userDTO.setFamily_name(issueJson.getString("family_name"));
+        userDTO.setLocale(issueJson.getString("locale"));
+
+        return userDTO;
     }
 
     @Override
-    public LoginDTO authenticateCode(String code) throws BusinessServiceException {
-        try {
-            // ask google auth library to authenticate Code and generate access and refresh token
-            TokenResponse tokenResponse = GoogleAuthorizeUtil.authenticateCode(code);
-
-            return convertTokenResponseToLoginDTO(tokenResponse);
-        } catch (Exception e) {
-
-            throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
-        }
-    }
-
-    @Override
-    public String createDefaultSheet(String workSpaceId, String sheetTitle, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public String createDefaultSheet(String workSpaceId, String sheetTitle, TokenResponse tokenResponse) throws BusinessServiceException {
         Optional<WorkSpaceEntity> optionalWorkSpaceEntity = workSpaceRepository.findById(workSpaceId);
 
         if (optionalWorkSpaceEntity.isEmpty()) {
@@ -70,12 +78,12 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
         WorkSpaceEntity workSpaceEntity = optionalWorkSpaceEntity.get();
 
         // check if token does have acces by getting sheets list or sth
-        if (!sheetsIntegration.isAuthorized(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.isAuthorized(workSpaceEntity.getSpreadSheetId(), tokenResponse)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
         // check if sheet does exist
-        if (!sheetsIntegration.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
@@ -85,22 +93,25 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
 
         sheetTitle = getMonthFromInt(monthNumber);
 
-        String sheetId = sheetsIntegration.createSheet(workSpaceEntity.getSpreadSheetId(), sheetTitle, tokenResponse, clientId);
+        String sheetId = sheetsIntegration.createSheet(workSpaceEntity.getSpreadSheetId(), sheetTitle, tokenResponse);
 
         // set weekday name and date for chosen month
-        sheetsIntegration.addMonthDays(workSpaceEntity.getSpreadSheetId(), sheetTitle, monthNumber, tokenResponse, clientId);
+        sheetsIntegration.addMonthDays(workSpaceEntity.getSpreadSheetId(), sheetTitle, monthNumber, tokenResponse);
         // set all cell text horizontal alignment as centered
-        sheetsIntegration.centerAllCellTexts(workSpaceEntity.getSpreadSheetId(), sheetId, tokenResponse, clientId);
+        sheetsIntegration.centerAllCellTexts(workSpaceEntity.getSpreadSheetId(), sheetId, tokenResponse);
         // change header row(first row) text color and background color
-        sheetsIntegration.setHeadersRowColor(workSpaceEntity.getSpreadSheetId(), sheetId, tokenResponse, clientId);
+        sheetsIntegration.setHeadersRowColor(workSpaceEntity.getSpreadSheetId(), sheetId, tokenResponse);
 
         return sheetId;
     }
 
     @Override
-    public void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void createWorkSpace(CreateWorkSpaceDTO createWorkSpaceDTO, TokenResponse tokenResponse) throws BusinessServiceException {
+        // check token
+        UserDTO userDTO = getUserInfo(tokenResponse.getAccessToken());
+        String email = userDTO.getEmail();
         // first check if token does have acces by getting sheets list or sth
-        if (!sheetsIntegration.isAuthorized(createWorkSpaceDTO.getSpreadSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.isAuthorized(createWorkSpaceDTO.getSpreadSheetId(), tokenResponse)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
@@ -108,16 +119,16 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
         WorkSpaceEntity newWorkSpaceEntity = new WorkSpaceEntity();
         newWorkSpaceEntity.setWorkSpaceTitle(createWorkSpaceDTO.getWorkSpaceTitle());
         newWorkSpaceEntity.setSpreadSheetId(createWorkSpaceDTO.getSpreadSheetId());
-        newWorkSpaceEntity.setEmail(createWorkSpaceDTO.getEmail());
+        newWorkSpaceEntity.setEmail(email);
 
         workSpaceRepository.save(newWorkSpaceEntity);
     }
 
     @Override
-    public void updateWorkSpace(UpdateWorkSpaceDTO updateWorkSpaceDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void updateWorkSpace(UpdateWorkSpaceDTO updateWorkSpaceDTO, TokenResponse tokenResponse) throws BusinessServiceException {
 
         // first check if token does have acces by getting sheets list or sth
-        if (!sheetsIntegration.isAuthorized(updateWorkSpaceDTO.getSpreadSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.isAuthorized(updateWorkSpaceDTO.getSpreadSheetId(), tokenResponse)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
@@ -143,7 +154,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
     }
 
     @Override
-    public void finishWorking(FinishWorkingRequestDTO finishWorkingRequestDTO, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public void finishWorking(FinishWorkingRequestDTO finishWorkingRequestDTO, TokenResponse tokenResponse) throws BusinessServiceException {
         Optional<WorkSpaceEntity> optionalWorkSpaceEntity = workSpaceRepository.findById(finishWorkingRequestDTO.getWorkSpaceId());
         if (optionalWorkSpaceEntity.isEmpty()) {
 
@@ -151,7 +162,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
         }
         WorkSpaceEntity newWorkSpaceEntity = optionalWorkSpaceEntity.get();
 
-        if (!sheetsIntegration.isAuthorized(newWorkSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.isAuthorized(newWorkSpaceEntity.getSpreadSheetId(), tokenResponse)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
@@ -159,11 +170,15 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
         LocalDateTime dateNow = LocalDateTime.now();
         int dayOfMonth = dateNow.getDayOfMonth();
 
-        sheetsIntegration.addFinishedTask(newWorkSpaceEntity.getSpreadSheetId(), finishWorkingRequestDTO.getSheetId(), dayOfMonth, finishWorkingRequestDTO.getTaskId(), tokenResponse, clientId);
+        sheetsIntegration.addFinishedTask(newWorkSpaceEntity.getSpreadSheetId(), finishWorkingRequestDTO.getSheetId(), dayOfMonth, finishWorkingRequestDTO.getTaskId(), tokenResponse);
     }
 
     @Override
-    public List<WorkSpaceDTO> getAllWorkSpaces(String email) throws BusinessServiceException {
+    public List<WorkSpaceDTO> getAllWorkSpaces(TokenResponse tokenResponse) throws BusinessServiceException {
+        // check token
+        UserDTO userDTO = getUserInfo(tokenResponse.getAccessToken());
+        String email = userDTO.getEmail();
+
         List<WorkSpaceDTO> listWorkSpaceDTOs = new ArrayList<>();
         List<WorkSpaceEntity> listWorkSpaceEntity = workSpaceRepository.findAllByEmail(email);
 
@@ -177,7 +192,7 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
     }
 
     @Override
-    public WorkSpaceDetailDTO getWorkSpaceDetail(String workSpaceId, TokenResponse tokenResponse, String clientId) throws BusinessServiceException {
+    public WorkSpaceDetailDTO getWorkSpaceDetail(String workSpaceId, TokenResponse tokenResponse) throws BusinessServiceException {
         Optional<WorkSpaceEntity> optionalWorkSpaceEntity = workSpaceRepository.findById(workSpaceId);
 
         if (optionalWorkSpaceEntity.isEmpty()) {
@@ -188,16 +203,16 @@ public class WorkSpaceServiceImpl implements WorkSpaceService {
         WorkSpaceEntity workSpaceEntity = optionalWorkSpaceEntity.get();
 
         // check if token does have acces by getting sheets list or sth
-        if (!sheetsIntegration.isAuthorized(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.isAuthorized(workSpaceEntity.getSpreadSheetId(), tokenResponse)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
         // check if sheet does exist
-        if (!sheetsIntegration.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId)) {
+        if (!sheetsIntegration.doesSpreedSheetExist(workSpaceEntity.getSpreadSheetId(), tokenResponse)) {
 
             throw new BusinessServiceException(ErrorCode.NOT_AUTHORIZED);
         }
-        List<SheetDTO> sheets = sheetsIntegration.getSheets(workSpaceEntity.getSpreadSheetId(), tokenResponse, clientId);
+        List<SheetDTO> sheets = sheetsIntegration.getSheets(workSpaceEntity.getSpreadSheetId(), tokenResponse);
 
         return convertEntityToWorkSpaceDetailDTO(workSpaceEntity, sheets);
     }

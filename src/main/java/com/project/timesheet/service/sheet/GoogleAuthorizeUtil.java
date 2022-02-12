@@ -39,8 +39,9 @@ public class GoogleAuthorizeUtil {
                 httpTransport, jsonFactory, CLIENT_ID, CLIENT_SECRET,
                 Arrays.asList(
                         scope,
-                        "https://spreadsheets.google.com/feeds",
-                        "https://docs.google.com/feeds"))
+                        "https://spreadsheets.google.com/feeds"
+                )
+        )
                 .setAccessType("offline")
                 .setApprovalPrompt("auto").build();
 
@@ -64,6 +65,20 @@ public class GoogleAuthorizeUtil {
         return credential;
     }
 
+    public static Credential authorize(String token) throws Exception {
+        String scope = SheetsScopes.SPREADSHEETS;
+
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setAccessToken(token);
+
+        Credential credential = createCredentialWithAccessTokenOnly(httpTransport, jsonFactory, tokenResponse);
+        return credential;
+    }
+
     public static TokenResponse authenticateCode(String code) throws Exception {
         String scope = SheetsScopes.SPREADSHEETS;
 
@@ -78,8 +93,8 @@ public class GoogleAuthorizeUtil {
                 httpTransport, jsonFactory, CLIENT_ID, CLIENT_SECRET,
                 Arrays.asList(
                         scope,
-                        "https://spreadsheets.google.com/feeds",
-                        "https://docs.google.com/feeds")
+                        "https://spreadsheets.google.com/feeds"
+                )
         )
                 .setAccessType("offline")
                 .setApprovalPrompt("auto").build();

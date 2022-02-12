@@ -8,6 +8,4 @@ public class CreateWorkSpaceDTO {
     private String workSpaceTitle;
 
     private String spreadSheetId;
-
-    private String email;
 }
