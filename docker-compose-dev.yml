@@ -9,7 +9,7 @@ networks:
 services:
 
   mongodb-dev:
-    image: 'mongo:latest'
+    image: 'mongo:bionic'
     container_name: timesheetmongodbdev
     environment:
       - MONGO_LOG_DIR=/dev/null
