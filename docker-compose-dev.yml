@@ -9,7 +9,7 @@ networks:
 services:
 
   mongodb-dev:
-    image: 'mongo:latest'
+    image: 'mongo:bionic'
     container_name: timesheetmongodbdev
     environment:
       - MONGO_LOG_DIR=/dev/null
@@ -25,6 +25,8 @@ services:
     image: d4n14l/timesheet-module:latest
     container_name: timesheetdev
     restart: always
+    ports:
+      - '8082:8082'
     depends_on:
       - mongodb-dev
     networks:
