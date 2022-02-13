@@ -26,6 +26,11 @@ public class RestAPIs {
     @GetMapping("/get-user-info")
     public ResponseEntity<UserDTO> getUserInfo(@RequestHeader(name = "Authorization") String token) throws BusinessServiceException {
 
+
+        System.out.println("/get-user-info");
+        System.out.println(token);
+        System.out.println();
+
         return ResponseEntity.ok(workSpaceService.getUserInfo(token));
     }
 
@@ -37,6 +42,11 @@ public class RestAPIs {
     public ResponseEntity<String> createSheet(@RequestHeader(name = "Authorization") String accessToken,
                                               @RequestBody CreateSheetDTO CreateSheetDTO
     ) throws BusinessServiceException {
+
+        System.out.println("/create-sheet");
+        System.out.println(accessToken);
+        System.out.println(CreateSheetDTO);
+        System.out.println();
 
         TokenResponse tokenResponse = new TokenResponse();
 
@@ -74,6 +84,12 @@ public class RestAPIs {
                                               @RequestBody FinishWorkingRequestDTO finishWorkingRequestDTO
     ) throws BusinessServiceException {
 
+
+        System.out.println("/finish-working");
+        System.out.println(accessToken);
+        System.out.println(finishWorkingRequestDTO);
+        System.out.println();
+
         TokenResponse tokenResponse = new TokenResponse();
 
         tokenResponse.setAccessToken(accessToken);
@@ -94,6 +110,12 @@ public class RestAPIs {
                                             @RequestParam(name = "taskId") String taskId
     ) throws BusinessServiceException {
 
+
+        System.out.println("/stop-working");
+        System.out.println(accessToken);
+        System.out.println(taskId);
+        System.out.println();
+
         TokenResponse tokenResponse = new TokenResponse();
 
         tokenResponse.setAccessToken(accessToken);
@@ -112,6 +134,12 @@ public class RestAPIs {
                                              @RequestBody CreateWorkSpaceDTO createWorkSpaceDTO
     ) throws BusinessServiceException {
 
+
+        System.out.println("post /work-space");
+        System.out.println(accessToken);
+        System.out.println(createWorkSpaceDTO);
+        System.out.println();
+
         TokenResponse tokenResponse = new TokenResponse();
 
         tokenResponse.setAccessToken(accessToken);
@@ -127,10 +155,15 @@ public class RestAPIs {
      * @return
      * @throws BusinessServiceException
      */
-    @PutMapping("/work-space")
+    @PutMapping("put /work-space")
     public ResponseEntity<Void> updateWorkSpace(@RequestHeader(name = "Authorization") String accessToken,
                                                 @RequestBody UpdateWorkSpaceDTO updateWorkSpaceDTO
     ) throws BusinessServiceException {
+
+        System.out.println("/work-space");
+        System.out.println(accessToken);
+        System.out.println(updateWorkSpaceDTO);
+        System.out.println();
 
         TokenResponse tokenResponse = new TokenResponse();
 
@@ -147,6 +180,11 @@ public class RestAPIs {
      */
     @GetMapping("/work-spaces-list")
     public ResponseEntity<List<WorkSpaceDTO>> getWorkSpacesList(@RequestHeader(name = "Authorization") String accessToken) throws BusinessServiceException {
+
+        System.out.println("/work-spaces-list");
+        System.out.println(accessToken);
+        System.out.println();
+
         TokenResponse tokenResponse = new TokenResponse();
 
         tokenResponse.setAccessToken(accessToken);
@@ -164,6 +202,11 @@ public class RestAPIs {
     public ResponseEntity<WorkSpaceDetailDTO> getWorkSpace(@RequestHeader(name = "Authorization") String accessToken,
                                                            @RequestParam(name = "workSpaceId") String workSpaceId
     ) throws BusinessServiceException {
+
+        System.out.println("get /work-space");
+        System.out.println(accessToken);
+        System.out.println(workSpaceId);
+        System.out.println();
 
         TokenResponse tokenResponse = new TokenResponse();
 
